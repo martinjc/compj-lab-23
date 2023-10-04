@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- nonsense don't worry about this yet -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nobel!</title>
+
+    <!-- all this is for the map, firstly css for styling, then javascript for functionality -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""></script>
+
+    <!-- this is to make the page look pretty(ier)(ish)  -->
+    <style>
+
+        /* default styles for the page */
+        html, body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #111111;
+            background-color: #eee;
+            text-align: center;
+        }
+
+        /* centre the main content and make it only 80% of the page width */
+        #content {
+            width: 80%;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        #content p {
+            width: 60%;   
+            margin: 0 auto;         
+            text-align: center;
+
+        }
+
+        /* add a space for the map */
+        #map {
+            height: 400px;
+            width: 60%;
+            margin: auto;
+        }
+
+        .blink {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- here is all the HTML content -->
+    <div id="content">
+        <h1 class="blink">Nobel!</h1>
+
+        <!-- a blank paragraph where the text will go -->
+        <p id="nobeltext"></p>
+        <!-- a blank space where the map will go -->
+        <div id="map"></div>
+
+        <!-- a button to pick a random laureate -->
+        <input type="button" value="Pick Another!" id="pick" onclick="getRandomLaureate()">
+
+        <h2>ChatGPT says this:</h2>
+        <p>In a world where prestige often trumps transparency, the anticipation surrounding the upcoming Nobel Prize announcements has reached a fever pitch. As the Nobel Prize committees prepare to unveil their laureates, the international community is holding its breath, eager to see who will join the ranks of esteemed laureates and claim their place in history. The Nobel Prizes, a beacon of recognition in the worlds of science, literature, and peace, are shrouded in mystery until the very moment they are announced, leaving the world to speculate, gossip, and pontificate on who will ascend to the pinnacles of human achievement. While these prizes are meant to honor outstanding contributions to humanity, they also serve as a reminder of the sometimes murky waters of awards season, where politics, biases, and even scandalous controversies can rear their heads. In this article, we'll dive into the captivating spectacle that is the Nobel Prize announcement, exploring the whispers of behind-the-scenes intrigue and the extraordinary individuals whose names will soon be etched in history.</p>
+
+        <!-- a link to all the other prizes as required by Aidan. Why when this isn't what he asked for anyway? I don't know -->
+        <div>
+            <a href="https://www.nobelprize.org/prizes/lists/all-nobel-prizes/ ">All the nobel prizes</a>
+        </div>
+    </div>
+
+    <!-- load all the laureate data -->
+    <script src="data/nobel-prize-laureates.js"></script>
+    
+    <script>
+
+        // create a blank map centred on Cardiff
+        let map = L.map('map').setView([51.505, -3.09], 2);
+        let marker;
+
+        // add a tile layer to the map
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map)
+
+        // function to choose a random laureate and display their details
+        function getRandomLaureate() {
+            // remove any existing marker
+            if(marker) {
+                marker.remove();
+            }
+            // choose a random laureate
+            const randomIndex = Math.floor(Math.random() * laureates.length);
+            const randomLaureate = laureates[randomIndex];
+            console.log(randomLaureate);
+            // display their details
+            paragraph = document.getElementById('nobeltext');
+            paragraph.innerHTML = `${randomLaureate.firstname} ${randomLaureate.surname} won the Nobel Prize for ${randomLaureate.category} in ${randomLaureate.year} ${randomLaureate.motivation}`;
+            // if they have a location, move the map there and add a marker
+            if(randomLaureate.geo_point_2d){
+                map.setView([+randomLaureate.geo_point_2d.lat, +randomLaureate.geo_point_2d.lon], 5);
+                marker = L.marker([+randomLaureate.geo_point_2d.lat, +randomLaureate.geo_point_2d.lon]).addTo(map);
+            } else {
+                map.setView([51.505, -3.09], 2);
+            }
+        }
+        // call the function once when the page loads
+        getRandomLaureate();
+
+
+    </script>
+    
+</body>
+</html>
